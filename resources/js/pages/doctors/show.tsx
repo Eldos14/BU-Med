@@ -138,13 +138,12 @@ export default function DoctorShow({ doctor, reviews, rating_avg, rating_count, 
                             {/* Карточка врача */}
                             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700/60 dark:bg-slate-900">
                                 <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-start">
-                                    {doctor.photo ? (
-                                        <img src={doctor.photo} alt={doctor.fio} className="h-28 w-28 shrink-0 rounded-full object-cover object-top ring-4 ring-slate-100 dark:ring-slate-800" />
-                                    ) : (
-                                        <div className="flex h-28 w-28 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-4xl font-bold text-white">
-                                            {doctor.initial}
-                                        </div>
-                                    )}
+                                    <div className="relative flex h-28 w-28 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-4xl font-bold text-white ring-4 ring-slate-100 dark:ring-slate-800">
+                                        {doctor.initial}
+                                        {doctor.photo && (
+                                            <img src={doctor.photo} alt={doctor.fio} className="absolute inset-0 h-full w-full rounded-full object-cover object-top" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                                        )}
+                                    </div>
 
                                     <div className="min-w-0 flex-1 text-center sm:text-left">
                                         <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">{doctor.fio}</h1>

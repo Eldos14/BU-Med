@@ -131,20 +131,20 @@ export default function DoctorIndex({ doctors, search: initialSearch }: Props) {
                                     >
                                         <div className="bg-white dark:bg-card rounded-xl p-6 shadow-sm border border-border transition-all duration-200 group-hover:-translate-y-1 group-hover:shadow-md h-full flex flex-col">
                                             {/* Avatar */}
-                                            {doctor.photo ? (
-                                                <img
-                                                    src={`/storage/${doctor.photo}`}
-                                                    alt={doctor.fio}
-                                                    className="h-20 w-20 rounded-full object-cover mb-4 ring-2 ring-slate-100 dark:ring-slate-700"
-                                                />
-                                            ) : (
-                                                <div
-                                                    className="h-20 w-20 rounded-full flex items-center justify-center text-white text-2xl font-bold mb-4"
-                                                    style={{ background: 'linear-gradient(135deg, #2a7de1, #17a2b8)' }}
-                                                >
-                                                    {getInitials(doctor.fio)}
-                                                </div>
-                                            )}
+                                            <div
+                                                className="relative h-20 w-20 rounded-full flex items-center justify-center text-white text-2xl font-bold mb-4 ring-2 ring-slate-100 dark:ring-slate-700"
+                                                style={{ background: 'linear-gradient(135deg, #2a7de1, #17a2b8)' }}
+                                            >
+                                                {getInitials(doctor.fio)}
+                                                {doctor.photo && (
+                                                    <img
+                                                        src={`/storage/${doctor.photo}`}
+                                                        alt={doctor.fio}
+                                                        className="absolute inset-0 h-full w-full rounded-full object-cover"
+                                                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                                    />
+                                                )}
+                                            </div>
 
                                             <p className="text-lg font-semibold text-foreground leading-snug mb-1">
                                                 {doctor.fio}

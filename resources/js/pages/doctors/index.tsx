@@ -147,10 +147,9 @@ export default function PublicDoctors({ doctors, search }: Props) {
                                     >
                                         {/* Avatar */}
                                         <div className={`relative flex h-32 items-center justify-center rounded-t-2xl overflow-hidden bg-gradient-to-br ${avatarColors[i % avatarColors.length]}`}>
-                                            {d.photo ? (
-                                                <img src={d.photo} alt={d.fio} className="h-full w-full object-cover object-top" />
-                                            ) : (
-                                                <span className="text-4xl font-extrabold text-white/90">{d.initial}</span>
+                                            <span className="text-4xl font-extrabold text-white/90">{d.initial}</span>
+                                            {d.photo && (
+                                                <img src={d.photo} alt={d.fio} className="absolute inset-0 h-full w-full object-cover object-top" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                                             )}
                                             {d.specializations && (
                                                 <div className="absolute bottom-3 left-3 right-3">

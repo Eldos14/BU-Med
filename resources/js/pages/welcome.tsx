@@ -436,13 +436,12 @@ function DoctorsSection({ doctors, lang }: { doctors: DoctorCard[]; lang: Lang }
                                                 <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">{t(lang, 'doctors_no_reviews')}</p>
                                             )}
                                         </div>
-                                        {d.photo ? (
-                                            <img src={d.photo} alt={d.fio} className="h-16 w-16 shrink-0 rounded-full object-cover object-top ring-2 ring-slate-100 dark:ring-slate-700" />
-                                        ) : (
-                                            <div className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${avatarGradients[i % avatarGradients.length]} text-xl font-bold text-white`}>
-                                                {d.initial}
-                                            </div>
-                                        )}
+                                        <div className={`relative flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${avatarGradients[i % avatarGradients.length]} text-xl font-bold text-white ring-2 ring-slate-100 dark:ring-slate-700`}>
+                                            {d.initial}
+                                            {d.photo && (
+                                                <img src={d.photo} alt={d.fio} className="absolute inset-0 h-full w-full rounded-full object-cover object-top" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                                            )}
+                                        </div>
                                     </div>
 
                                     <p className="mb-4 flex-1 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
