@@ -34,5 +34,10 @@ RUN composer install --no-dev --optimize-autoloader
 # Права доступа
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
+# Создаем пустой файл SQLite базы данных и запускаем миграции
+RUN touch /var/www/html/database/database.sqlite \
+    && chown www-data:www-data /var/www/html/database/database.sqlite \
+    && chmod 775 /var/www/html/database/database.sqlite
+
 EXPOSE 80
-CMD ["apache2-foreground"]
+CMD php artisan migrate --force && apache2-foreground
