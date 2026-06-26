@@ -1,11 +1,3 @@
-# Этап 1: Сборка фронтенда (React + Vite)
-FROM node:20-alpine AS frontend-builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
-COPY . .
-RUN npm run build
-
 # Этап 2: Сборка бэкенда (Laravel PHP)
 FROM php:8.2-apache
 RUN apt-get update && apt-get install -y \
@@ -26,8 +18,8 @@ WORKDIR /var/www/html
 COPY . .
 COPY --from=frontend-builder /app/public/build ./public/build
 
-# Установка Composer
-RUN curl -sS https://getcomposer.org | php -- --install-dir=/usr/local/bin --filename=composer
+# Установка Composer из официального образа
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev --optimize-autoloader
 
 # Права доступа
