@@ -43,4 +43,5 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 EXPOSE 80
 
 # Запуск миграций перед включением сервера
-CMD php artisan migrate --force && apache2-foreground
+CMD sleep 5 && php artisan migrate --force && apache2-foreground
+
