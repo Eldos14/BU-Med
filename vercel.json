@@ -14,10 +14,5 @@
             "src": "/(.*)",
             "dest": "/api/index.php"
         }
-    ],
-    "overrides": {
-        "package.json": {
-            "buildCommand": "amazon-linux-extras install php8.2 -y && composer install --no-dev && npm run build"
-        }
-    }
+    ]
 }
