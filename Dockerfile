@@ -12,11 +12,12 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
+    libpq-dev \
     zip \
     unzip \
     git \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd pdo pdo_mysql
+    && docker-php-ext-install gd pdo pdo_mysql pdo_pgsql pgsql
 
 # Настройка Apache под Laravel
 RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
@@ -33,11 +34,6 @@ RUN composer install --no-dev --optimize-autoloader
 
 # Права доступа
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-
-# Создаем пустой файл SQLite базы данных и запускаем миграции
-RUN touch /var/www/html/database/database.sqlite \
-    && chown www-data:www-data /var/www/html/database/database.sqlite \
-    && chmod 775 /var/www/html/database/database.sqlite
 
 EXPOSE 80
 CMD php artisan migrate --force && apache2-foreground
