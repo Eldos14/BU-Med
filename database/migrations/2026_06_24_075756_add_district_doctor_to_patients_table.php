@@ -1,0 +1,25 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('patients', function (Blueprint $table) {
+            $table->foreignId('district_doctor_id')->nullable()->constrained('staff')->nullOnDelete()->after('clinic_id');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('patients', function (Blueprint $table) {
+            $table->dropConstrainedForeignId('district_doctor_id');
+        });
+    }
+};
