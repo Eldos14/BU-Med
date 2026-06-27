@@ -20,6 +20,8 @@ import {
 import { useEffect, useRef, useState } from 'react';
 
 import Spline from '@splinetool/react-spline';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 
 
@@ -192,7 +194,7 @@ const VISIBLE = 3;
 
 function ReviewCard({ review, lang }: { review: FeaturedReview; lang: Lang }) {
     return (
-        <div className="flex-1 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700/60 dark:bg-slate-800/60 dark:shadow-none">
+        <div data-review-card className="flex-1 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700/60 dark:bg-slate-800/60 dark:shadow-none">
             <div className="mb-3 flex items-center gap-2">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-600 dark:bg-blue-900/60 dark:text-blue-300">
                     {review.patient?.fio?.charAt(0).toUpperCase() ?? '?'}
@@ -228,9 +230,9 @@ function ReviewsCarousel({ reviews, lang }: { reviews: FeaturedReview[]; lang: L
     const visible = reviews.slice(start, start + VISIBLE);
 
     return (
-        <section className="bg-slate-100 px-4 py-16 sm:px-6 lg:px-8 dark:bg-slate-900/50">
+        <section data-reviews-section className="bg-slate-100 px-4 py-16 sm:px-6 lg:px-8 dark:bg-slate-900/50">
             <div className="mx-auto max-w-6xl">
-                <div className="mb-10 flex items-end justify-between">
+                <div data-section-heading className="mb-10 flex items-end justify-between">
                     <div className="text-center sm:text-left">
                         <p className="mb-2 text-xs font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400">{t(lang, 'reviews_badge')}</p>
                         <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white">{t(lang, 'reviews_title')}</h2>
@@ -403,9 +405,9 @@ function DoctorsSection({ doctors, lang }: { doctors: DoctorCard[]; lang: Lang }
         count === 1 ? t(lang, 'doctors_reviews_1') : count < 5 ? t(lang, 'doctors_reviews_2_4') : t(lang, 'doctors_reviews_5');
 
     return (
-        <section id="specialties" className="bg-slate-50 px-4 py-20 sm:px-6 lg:px-8 dark:bg-slate-950">
+        <section id="specialties" data-doctors-section className="bg-slate-50 px-4 py-20 sm:px-6 lg:px-8 dark:bg-slate-950">
             <div className="mx-auto max-w-6xl">
-                <div className="mb-12 text-center">
+                <div data-section-heading className="mb-12 text-center">
                     <p className="mb-2 text-xs font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400">{t(lang, 'doctors_badge')}</p>
                     <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white">{t(lang, 'doctors_title')}</h2>
                 </div>
@@ -421,6 +423,7 @@ function DoctorsSection({ doctors, lang }: { doctors: DoctorCard[]; lang: Lang }
                                 <Link
                                     key={d.id}
                                     href={route('doctors.show', d.id)}
+                                    data-doctor-card
                                     className="group flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg dark:border-slate-700/60 dark:bg-slate-800/60 dark:hover:border-blue-700/50"
                                 >
                                     <div className="mb-4 flex items-start justify-between gap-3">
@@ -533,6 +536,84 @@ export default function Welcome() {
         };
     }, []);
 
+    useEffect(() => {
+        gsap.registerPlugin(ScrollTrigger);
+
+        const ctx = gsap.context(() => {
+            // Hero: анимация при загрузке страницы
+            const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+            tl.fromTo('[data-hero-badge]', { opacity: 0, y: -16 }, { opacity: 1, y: 0, duration: 0.5 })
+              .fromTo('[data-hero-title]', { opacity: 0, y: 40 },  { opacity: 1, y: 0, duration: 0.65 }, '-=0.25')
+              .fromTo('[data-hero-sub]',   { opacity: 0, y: 25 },  { opacity: 1, y: 0, duration: 0.5 },  '-=0.35')
+              .fromTo('[data-hero-btns]',  { opacity: 0, y: 20 },  { opacity: 1, y: 0, duration: 0.5 },  '-=0.3');
+
+            // Section headings: каждый триггерится отдельно при скролле
+            gsap.utils.toArray<HTMLElement>('[data-section-heading]').forEach((el) => {
+                gsap.fromTo(el,
+                    { opacity: 0, y: 30 },
+                    { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out',
+                      scrollTrigger: { trigger: el, start: 'top 88%', once: true } }
+                );
+            });
+
+            // How it works: stagger снизу
+            const howCards = gsap.utils.toArray<HTMLElement>('[data-how-card]');
+            if (howCards.length) {
+                gsap.fromTo(howCards,
+                    { opacity: 0, y: 60 },
+                    { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', stagger: 0.15,
+                      scrollTrigger: { trigger: howCards[0], start: 'top 82%', once: true } }
+                );
+            }
+
+            // Stats: scale + fade
+            gsap.fromTo('[data-stats-block]',
+                { opacity: 0, scale: 0.94, y: 20 },
+                { opacity: 1, scale: 1, y: 0, duration: 0.65, ease: 'back.out(1.4)',
+                  scrollTrigger: { trigger: '[data-stats-block]', start: 'top 85%', once: true } }
+            );
+
+            // Doctor cards: stagger снизу
+            const doctorCards = gsap.utils.toArray<HTMLElement>('[data-doctor-card]');
+            if (doctorCards.length) {
+                gsap.fromTo(doctorCards,
+                    { opacity: 0, y: 50 },
+                    { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out', stagger: 0.1,
+                      scrollTrigger: { trigger: '[data-doctors-section]', start: 'top 80%', once: true } }
+                );
+            }
+
+            // Review cards: slide справа
+            const reviewCards = gsap.utils.toArray<HTMLElement>('[data-review-card]');
+            if (reviewCards.length) {
+                gsap.fromTo(reviewCards,
+                    { opacity: 0, x: 50 },
+                    { opacity: 1, x: 0, duration: 0.6, ease: 'power3.out', stagger: 0.12,
+                      scrollTrigger: { trigger: '[data-reviews-section]', start: 'top 80%', once: true } }
+                );
+            }
+
+            // Contact cards: stagger снизу
+            const contactCards = gsap.utils.toArray<HTMLElement>('[data-contact-card]');
+            if (contactCards.length) {
+                gsap.fromTo(contactCards,
+                    { opacity: 0, y: 40 },
+                    { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out', stagger: 0.12,
+                      scrollTrigger: { trigger: contactCards[0], start: 'top 85%', once: true } }
+                );
+            }
+
+            // CTA: zoom + fade
+            gsap.fromTo('[data-cta-block]',
+                { opacity: 0, scale: 0.96, y: 30 },
+                { opacity: 1, scale: 1, y: 0, duration: 0.7, ease: 'power3.out',
+                  scrollTrigger: { trigger: '[data-cta-block]', start: 'top 80%', once: true } }
+            );
+        });
+
+        return () => ctx.revert();
+    }, []);
+
     const dashboardHref = auth.user?.role === 'patient'
         ? route('patient.dashboard')
         : auth.user?.role === 'doctor'
@@ -610,22 +691,22 @@ export default function Welcome() {
 
                         {/* ── Компактный текст сверху — по центру ── */}
                         <div className="mx-auto mb-4 max-w-2xl text-center">
-                            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50/80 px-4 py-1.5 backdrop-blur-sm dark:border-blue-800/50 dark:bg-blue-900/30">
+                            <div data-hero-badge className="mb-4 inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50/80 px-4 py-1.5 backdrop-blur-sm dark:border-blue-800/50 dark:bg-blue-900/30">
                                 <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-violet-500 dark:bg-blue-400" />
                                 <span className="text-xs font-semibold tracking-wide text-violet-700 dark:text-blue-400">{t(lang, 'hero_badge')}</span>
                             </div>
 
-                            <h1 className="mb-3 text-4xl font-extrabold leading-tight tracking-tight text-slate-900 dark:text-white lg:text-5xl">
+                            <h1 data-hero-title className="mb-3 text-4xl font-extrabold leading-tight tracking-tight text-slate-900 dark:text-white lg:text-5xl">
                                 {t(lang, 'hero_title_1')}{' '}
                                 <span className="bg-gradient-to-r from-blue-600 via-violet-600 to-pink-500 bg-clip-text text-transparent dark:from-blue-400 dark:via-violet-400 dark:to-pink-400">{t(lang, 'hero_title_2')}</span>
                                 {' '}{t(lang, 'hero_title_3')}
                             </h1>
 
-                            <p className="mb-6 text-sm text-slate-500 dark:text-slate-400 lg:text-base">
+                            <p data-hero-sub className="mb-6 text-sm text-slate-500 dark:text-slate-400 lg:text-base">
                                 {t(lang, 'hero_subtitle')}
                             </p>
 
-                            <div className="flex flex-wrap items-center justify-center gap-3">
+                            <div data-hero-btns className="flex flex-wrap items-center justify-center gap-3">
                                 <Link
                                     href={auth.user ? dashboardHref : route('register')}
                                     className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-violet-600 px-7 py-3 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-violet-200 dark:hover:shadow-violet-900"
@@ -653,13 +734,13 @@ export default function Welcome() {
                 {/* ↑ pt-32 = отступ после картинки, py = padding секции ↑ */}
                 <section id="how-it-works" className="bg-white px-4 pt-10 pb-24 sm:px-6 lg:px-8 dark:bg-slate-900/40">
                     <div className="mx-auto max-w-5xl">
-                        <div className="mb-12 text-center">
+                        <div data-section-heading className="mb-12 text-center">
                             <p className="mb-2 text-xs font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400">{t(lang, 'how_badge')}</p>
                             <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white">{t(lang, 'how_title')}</h2>
                         </div>
                         <div className="grid gap-6 sm:grid-cols-3">
                             {stepsMeta.map((item, i) => (
-                                <div key={i} className="relative rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition-all hover:-translate-y-1 hover:border-slate-300 hover:shadow-lg dark:border-slate-700/60 dark:bg-slate-800/60 dark:hover:border-slate-600 dark:shadow-none">
+                                <div key={i} data-how-card className="relative rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition-all hover:-translate-y-1 hover:border-slate-300 hover:shadow-lg dark:border-slate-700/60 dark:bg-slate-800/60 dark:hover:border-slate-600 dark:shadow-none">
                                     <span className="absolute -top-3 left-6 rounded-full border border-slate-200 bg-white px-3 py-0.5 text-xs font-bold text-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500">
                                         {i + 1}
                                     </span>
@@ -678,7 +759,7 @@ export default function Welcome() {
                 {/* Цвета чисел: color="text-???-600" ниже ↓             */}
                 <section className="bg-white px-4 pb-20 sm:px-6 lg:px-8 dark:bg-slate-900/40">
                     <div className="mx-auto max-w-4xl">
-                        <div className="grid grid-cols-3 divide-x divide-slate-100 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-xl dark:divide-slate-800 dark:border-slate-800 dark:bg-slate-900">
+                        <div data-stats-block className="grid grid-cols-3 divide-x divide-slate-100 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-xl dark:divide-slate-800 dark:border-slate-800 dark:bg-slate-900">
                             <StatCard value={stats.patients} label={t(lang, 'stat_patients')} color="text-pink-600 dark:text-pink-400" />
                             <StatCard value={stats.doctors} label={t(lang, 'stat_doctors')} color="text-blue-600 dark:text-blue-400" />
                             <StatCard value={stats.appointments} label={t(lang, 'stat_appointments')} color="text-violet-600 dark:text-violet-400" />
@@ -695,7 +776,7 @@ export default function Welcome() {
                 {/* ── MAP / CONTACTS ─────────────────────────────────── */}
                 <section id="contacts" className="bg-white px-4 py-20 sm:px-6 lg:px-8 dark:bg-slate-900/40">
                     <div className="mx-auto max-w-6xl">
-                        <div className="mb-10 text-center">
+                        <div data-section-heading className="mb-10 text-center">
                             <p className="mb-2 text-xs font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400">{t(lang, 'contacts_badge')}</p>
                             <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white">{t(lang, 'contacts_title')}</h2>
                         </div>
@@ -731,7 +812,7 @@ export default function Welcome() {
 
                         {/* Contact cards */}
                         <div className="mt-6 grid gap-4 sm:grid-cols-3">
-                            <div className="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm dark:border-slate-700/50 dark:bg-slate-800/60 dark:shadow-none">
+                            <div data-contact-card className="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm dark:border-slate-700/50 dark:bg-slate-800/60 dark:shadow-none">
                                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/40">
                                     <Phone className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                                 </div>
@@ -741,7 +822,7 @@ export default function Welcome() {
                                 </a>
                             </div>
 
-                            <div className="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm dark:border-slate-700/50 dark:bg-slate-800/60 dark:shadow-none">
+                            <div data-contact-card className="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm dark:border-slate-700/50 dark:bg-slate-800/60 dark:shadow-none">
                                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40">
                                     <Mail className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                                 </div>
@@ -751,7 +832,7 @@ export default function Welcome() {
                                 </a>
                             </div>
 
-                            <div className="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm dark:border-slate-700/50 dark:bg-slate-800/60 dark:shadow-none">
+                            <div data-contact-card className="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm dark:border-slate-700/50 dark:bg-slate-800/60 dark:shadow-none">
                                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-violet-100 dark:bg-violet-900/40">
                                     <Clock className="h-5 w-5 text-violet-600 dark:text-violet-400" />
                                 </div>
@@ -771,7 +852,7 @@ export default function Welcome() {
                 {/* ── CTA ────────────────────────────────────────────── */}
                 <section id="about" className="px-4 py-16 sm:px-6 lg:px-8">
                     <div className="mx-auto max-w-4xl">
-                        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-blue-600 to-indigo-700 px-10 py-14 text-center text-white shadow-2xl">
+                        <div data-cta-block className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-blue-600 to-indigo-700 px-10 py-14 text-center text-white shadow-2xl">
                             <div className="pointer-events-none absolute -top-16 -right-16 h-64 w-64 rounded-full bg-white/10" />
                             <div className="pointer-events-none absolute -bottom-10 -left-10 h-48 w-48 rounded-full bg-indigo-500/30" />
                             <p className="relative mb-2 text-xs font-bold uppercase tracking-widest text-blue-200">{t(lang, 'cta_badge')}</p>

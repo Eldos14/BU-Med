@@ -39,6 +39,10 @@ class DemoPeopleSeeder extends Seeder
 
     public function run(): void
     {
+        if (Staff::count() >= 10 && Patient::count() >= 15) {
+            return;
+        }
+
         $branch = Branch::first() ?? Branch::create([
             'name' => 'Баишев мед',
             'address' => 'г. Актобе',
