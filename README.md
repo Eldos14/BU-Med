@@ -114,3 +114,5 @@ npm run lint
 - [Vite documentation](https://vite.dev/guide/)
 - [Inertia.js documentation](https://inertiajs.com/)
 - [React documentation](https://react.dev/)
+  Тест активности
+  rtgrgrt
