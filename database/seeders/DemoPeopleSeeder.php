@@ -47,6 +47,7 @@ class DemoPeopleSeeder extends Seeder
             'name' => 'Баишев мед',
             'address' => 'г. Актобе',
             'phone' => '+7 (7132) 00-00-00',
+            'department' => 'Главное отделение',
         ]);
 
         // ── 10 врачей ──
