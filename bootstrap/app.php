@@ -23,7 +23,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\EnsureRole::class,
         ]);
 		
-		$middleware->trustProxies(at: '*');
+        $middleware->trustProxies(at: '*');
+
+        // ИСКЛЮЧАЕМ ПРОВЕРКУ CSRF ДЛЯ ЧАТА AI:
+        $middleware->validateCsrfTokens(except: [
+            'patient/ai-assistant', 
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
